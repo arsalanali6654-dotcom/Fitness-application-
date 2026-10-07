@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FitPulse AI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#111827;color:white;padding:16px;position:sticky;top:0;z-index:5}
+.wrap{max-width:1050px;margin:auto;padding:16px}.brand{font-size:24px;font-weight:800}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:12px;padding:11px 15px;background:#2563eb;color:white;font-weight:700;cursor:pointer}
+button.secondary{background:#e5e7eb;color:#111827}.hidden{display:none!important}
+.card{background:white;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 5px 20px #0000000d}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d7dce5;border-radius:11px;margin-top:6px;font:inherit}
+label{font-weight:700;font-size:14px}.hero{padding:24px 0}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{background:#111827;color:white;border-radius:16px;padding:18px}.stat b{display:block;font-size:27px}
+#chat{height:350px;overflow:auto;border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fafafa}
+.msg{padding:10px 12px;border-radius:13px;margin:8px 0;max-width:90%}.me{background:#dbeafe;margin-left:auto}.ai{background:#e5e7eb}
+.small{color:#64748b;font-size:13px}.danger{background:#dc2626}
+.auth{max-width:480px;margin:35px auto}.success{color:#15803d}.error{color:#b91c1c}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+<div class="brand">💪 FitPulse AI</div>
+<div id="nav" class="hidden">
+<nav>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('coach')">🤖 AI Coach</button>
+<button onclick="show('plan')">📅 Plan</button>
+<button onclick="show('progress')">📊 Progress</button>
+<button onclick="show('profile')">👤 Profile</button>
+<button class="danger" onclick="logout()">Logout</button>
+</nav>
+</div>
+</div>
+</header>
+
+<main class="wrap">
+<section id="auth" class="auth">
+<div class="card">
+<h1>FitPulse AI</h1><p>Your personal fitness companion.</p>
+<div id="authMsg"></div>
+<div id="signupBox">
+<h2>Create Account</h2>
+<div class="grid">
+<div><label>Name</label><input id="sName"></div>
+<div><label>Email</label><input id="sEmail" type="email"></div>
+<div><label>Password</label><input id="sPass" type="password"></div>
+<div><label>Age</label><input id="sAge" type="number"></div>
+<div><label>Height (cm)</label><input id="sHeight" type="number"></div>
+<div><label>Weight (kg)</label><input id="sWeight" type="number"></div>
+<div><label>Activity</label><select id="sActivity"><option>Low</option><option>Moderate</option><option>High</option></select></div>
+<div><label>Goal</label><select id="sGoal"><option>General fitness</option><option>Strength</option><option>Endurance</option><option>Mobility</option></select></div>
+</div><br><button onclick="signup()">Sign Up</button>
+<button class="secondary" onclick="toggleAuth()">I already have an account</button>
+</div>
+<div id="loginBox" class="hidden">
+<h2>Login</h2>
+<label>Email</label><input id="lEmail" type="email">
+<label>Password</label><input id="lPass" type="password">
+<br><button onclick="login()">Login</button>
+<button class="secondary" onclick="toggleAuth()">Create account</button>
+</div>
+</div>
+</section>
+
+<section id="app" class="hidden">
+<section id="dashboard" class="page">
+<div class="hero"><h1>Welcome, <span id="userName"></span> 👋</h1><p class="small">Your dashboard is connected to your account.</p></div>
+<div class="stats">
+<div class="stat">Fitness score<b id="score">0</b></div>
+<div class="stat">Workout<b id="duration">20 min</b></div>
+<div class="stat">Water target<b id="water">—</b></div>
+<div class="stat">Weekly days<b id="days">—</b></div>
+</div>
+<div class="card"><h2>Today's Tasks</h2><div id="tasks"></div></div>
+</section>
+
+<section id="coach" class="page hidden">
+<div class="card"><h2>🤖 AI Coach</h2><p class="small">Ask about safe workouts, routines, recovery, or general fitness.</p>
+<div id="chat"></div><br>
+<textarea id="question" rows="3" placeholder="Ask your AI Coach..."></textarea><br><button onclick="askCoach()">Send</button>
+</div>
+</section>
+
+<section id="plan" class="page hidden">
+<div class="card"><h2>📅 Weekly Plan</h2><div id="weekly"></div></div>
+</section>
+
+<section id="progress" class="page hidden">
+<div class="card"><h2>📊 Progress</h2><p>Save a completed activity to your account.</p>
+<input id="activityName" placeholder="Activity name">
+<input id="minutes" type="number" placeholder="Minutes">
+<br><button onclick="saveProgress()">Save Progress</button>
+<div id="progressList"></div>
+</div>
+</section>
+
+<section id="profile" class="page hidden">
+<div class="card"><h2>👤 Profile</h2>
+<div class="grid">
+<div><label>Name</label><input id="pName"></div>
+<div><label>Age</label><input id="pAge" type="number"></div>
+<div><label>Height</label><input id="pHeight" type="number"></div>
+<div><label>Weight</label><input id="pWeight" type="number"></div>
+<div><label>Activity</label><select id="pActivity"><option>Low</option><option>Moderate</option><option>High</option></select></div>
+<div><label>Goal</label><select id="pGoal"><option>General fitness</option><option>Strength</option><option>Endurance</option><option>Mobility</option></select></div>
+</div><br><button onclick="saveProfile()">Save Profile</button><p id="profileMsg"></p></div>
+</section>
+</section>
+</main>
+
+<script>
+const API="/api";
+let token=localStorage.getItem("fitpulse_token");
+const $=id=>document.getElementById(id);
+function msg(t,err=false){$("authMsg").innerHTML='<p class="'+(err?'error':'success')+'">'+t+'</p>'}
+function toggleAuth(){$("signupBox").classList.toggle("hidden");$("loginBox").classList.toggle("hidden");$("authMsg").innerHTML=""}
+async function api(path,opt={}){
+ opt.headers=Object.assign({"Content-Type":"application/json"},opt.headers||{});
+ if(token) opt.headers.Authorization="Bearer "+token;
+ const r=await fetch(API+path,opt); const d=await r.json().catch(()=>({}));
+ if(!r.ok) throw Error(d.error||"Request failed"); return d;
+}
+async function signup(){
+ try{const d=await api("/signup",{method:"POST",body:JSON.stringify({
+ name:$("sName").value,email:$("sEmail").value,password:$("sPass").value,
+ age:Number($("sAge").value),height:Number($("sHeight").value),weight:Number($("sWeight").value),
+ activity:$("sActivity").value,goal:$("sGoal").value})});
+ token=d.token;localStorage.setItem("fitpulse_token",token);startApp()
+ }catch(e){msg(e.message,true)}
+}
+async function login(){
+ try{const d=await api("/login",{method:"POST",body:JSON.stringify({email:$("lEmail").value,password:$("lPass").value})});
+ token=d.token;localStorage.setItem("fitpulse_token",token);startApp()
+ }catch(e){msg(e.message,true)}
+}
+async function startApp(){
+ $("auth").classList.add("hidden");$("app").classList.remove("hidden");$("nav").classList.remove("hidden");
+ await loadMe(); await loadChats(); await loadProgress(); show("dashboard")
+}
+async function loadMe(){
+ try{const d=await api("/me"),u=d.user; $("userName").textContent=u.name;
+ $("pName").value=u.name||"";$("pAge").value=u.age||"";$("pHeight").value=u.height||"";$("pWeight").value=u.weight||"";
+ $("pActivity").value=u.activity||"Moderate";$("pGoal").value=u.goal||"General fitness";
+ $("water").textContent=u.age<18?"Personalized":(Math.round((u.weight||60)*0.033*10)/10)+" L";
+ $("days").textContent=u.activity==="High"?"4-5":"3-4";$("duration").textContent=u.activity==="High"?"30 min":"20 min";
+ $("score").textContent=Math.min(100,50+(u.age?10:0)+(u.height?10:0)+(u.weight?10:0)+(u.goal?20:0));
+ buildTasks();buildWeek(u)
+ }catch(e){logout()}
+}
+function buildTasks(){
+ $("tasks").innerHTML=["Warm-up / mobility","Main workout","Walk or light movement","Recovery / stretching"].map((x,i)=>`<label style="display:block;margin:12px"><input type="checkbox" onchange="taskDone()"> ${x}</label>`).join("")
+}
+function taskDone(){let n=[...$("tasks").querySelectorAll("input:checked")].length;$("score").textContent=Math.min(100,50+n*10)}
+function buildWeek(u){
+ $("weekly").innerHTML=["Day 1 — Full-body movement","Day 2 — Walk + mobility","Day 3 — Strength basics","Day 4 — Recovery","Day 5 — Cardio/endurance","Day 6 — Light activity","Day 7 — Rest + review"].map(x=>"<div class='card'>"+x+"<br><span class='small'>Adjust intensity to your ability and stop if something hurts.</span></div>").join("")
+}
+function show(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden")}
+async function askCoach(){
+ const q=$("question").value.trim();if(!q)return;
+ addChat(q,"me");$("question").value="";
+ try{const d=await api("/coach",{method:"POST",body:JSON.stringify({message:q})});addChat(d.answer,"ai")}
+ catch(e){addChat(e.message,"ai")}
+}
+function addChat(t,c){$("chat").innerHTML+=`<div class="msg ${c}">${escapeHtml(t)}</div>`;$("chat").scrollTop=$("chat").scrollHeight}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+async function loadChats(){try{const d=await api("/chats");$("chat").innerHTML="";d.chats.forEach(c=>{addChat(c.message,"me");addChat(c.answer,"ai")})}catch(e){}}
+async function saveProfile(){
+ try{await api("/me",{method:"PUT",body:JSON.stringify({name:$("pName").value,age:Number($("pAge").value),height:Number($("pHeight").value),weight:Number($("pWeight").value),activity:$("pActivity").value,goal:$("pGoal").value})});$("profileMsg").textContent="Profile saved.";loadMe()}catch(e){$("profileMsg").textContent=e.message}
+}
+async function saveProgress(){
+ try{await api("/progress",{method:"POST",body:JSON.stringify({activity:$("activityName").value,minutes:Number($("minutes").value)})});$("activityName").value="";$("minutes").value="";loadProgress()}catch(e){alert(e.message)}
+}
+async function loadProgress(){
+ try{const d=await api("/progress");$("progressList").innerHTML="<h3>Saved activities</h3>"+d.progress.map(x=>`<div class="card">${escapeHtml(x.activity)} — ${x.minutes} min<br><span class="small">${new Date(x.created_at).toLocaleString()}</span></div>`).join("")}catch(e){}
+}
+function logout(){localStorage.removeItem("fitpulse_token");token=null;location.reload()}
+if(token)startApp();
+</script>
+</body>
+</html>
